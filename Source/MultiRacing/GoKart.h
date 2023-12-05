@@ -23,6 +23,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	
+
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -34,10 +36,34 @@ private:
 	UPROPERTY(EditAnywhere)
 	float MaxDrivingForce = 10000;
 
+	UPROPERTY(EditAnywhere)
+	float MinTurningRadius = 10;
+
+	//공기저항
+	UPROPERTY(EditAnywhere)
+	float DragCoefficient = 16;
+
+	//바퀴의 구름저항? 0.015는 콘크리트의 저항값
+	UPROPERTY(EditAnywhere)
+	float RollingRegistanceCoefficient = 0.015;
+
 	FVector Velocity;
 
 	float Throttle;
 
-	void MoveForward(float Value);
+	float SteeringThrow;
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_MoveForward(float Value);
+
+	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_MoveRight(float Value);
+
+	void UpdateLocationFromVelocity(float DeltaTime);
+
+	void ApplyRotation(float DeltaTime);
+
+	FVector GetAirResistance();
+	FVector GetRollingResistance();
 
 };
