@@ -53,9 +53,7 @@ void AGoKart::Tick(float DeltaTime)
 
 	UpdateLocationFromVelocity(DeltaTime);
 	
-	DrawDebugString(GetWorld(), FVector(0, 0, 100), GetEnumText(GetRemoteRole()), this, FColor::White, DeltaTime);
-	DrawDebugString(GetWorld(), FVector(0, 0, 150), GetEnumText(GetRemoteRole()), this, FColor::Yellow, DeltaTime);
-	
+	DrawDebugString(GetWorld(), FVector(0, 0, 100), GetEnumText(GetLocalRole()), this, FColor::White, DeltaTime);
 }
 
 FVector AGoKart::GetAirResistance()
@@ -69,6 +67,7 @@ FVector AGoKart::GetRollingResistance()
 	float NormalForce = Mass * AccelerationDueToGravity;
 	return -Velocity.GetSafeNormal() * RollingRegistanceCoefficient * NormalForce;
 }
+
 
 void AGoKart::UpdateLocationFromVelocity(float DeltaTime)
 {
@@ -97,15 +96,27 @@ void AGoKart::ApplyRotation(float DeltaTime)
 void AGoKart::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	PlayerInputComponent->BindAxis("Forward", this, &AGoKart::Server_MoveForward);
-	PlayerInputComponent->BindAxis("Right", this, &AGoKart::Server_MoveRight);
+	PlayerInputComponent->BindAxis("Forward", this, &AGoKart::MoveForward);
+	PlayerInputComponent->BindAxis("Right", this, &AGoKart::MoveRight);
 
+}
+
+
+void AGoKart::MoveForward(float Value)
+{
+	Throttle = FMath::Clamp(Value, -1.0f, 1.0f);
+	Server_MoveForward(Value);
+}
+
+void AGoKart::MoveRight(float Value)
+{
+	SteeringThrow = FMath::Clamp(Value, -1.0f, 1.0f);
+	Server_MoveRight(Value);
 }
 
 void AGoKart::Server_MoveForward_Implementation(float Value)
 {
 	Throttle = FMath::Clamp(Value, -1.0f, 1.0f);
-	
 }
 
 bool AGoKart::Server_MoveForward_Validate(float Value)
