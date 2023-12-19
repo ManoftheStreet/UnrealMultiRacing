@@ -6,6 +6,38 @@
 #include "GameFramework/Pawn.h"
 #include "GoKart.generated.h"
 
+USTRUCT()
+struct FGokartMove
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY()
+	float Throttle;
+	UPROPERTY()
+	float SteeringThrow;
+
+	UPROPERTY()
+	float DeltaTime;
+
+	UPROPERTY()
+	float Time;
+};
+
+USTRUCT()
+struct FGokartState
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY()
+	FTransform Transform;
+
+	UPROPERTY()
+	FVector Velocity;
+
+	UPROPERTY()
+	FGokartMove LastMove;
+};
+
 UCLASS()
 class MULTIRACING_API AGoKart : public APawn
 {
@@ -29,6 +61,15 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+	void SimulateMove(FGokartMove Move);
+
+	FVector GetAirResistance();
+	FVector GetRollingResistance();
+
+	void ApplyRotation(float DeltaTime);
+
+	void UpdateLocationFromVelocity(float DeltaTime);
+
 	//자동차의 질량 (kg)
 	UPROPERTY(EditAnywhere)
 	float Mass = 1000;
@@ -47,26 +88,22 @@ private:
 	UPROPERTY(EditAnywhere)
 	float RollingRegistanceCoefficient = 0.015;
 
-	FVector Velocity;
-
-	float Throttle;
-
-	float SteeringThrow;
-
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 
 	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_MoveForward(float Value);
+	void Server_SendMove(FGokartMove Move);
 
-	UFUNCTION(Server, Reliable, WithValidation)
-	void Server_MoveRight(float Value);
+	UPROPERTY(ReplicatedUsing = OnRep_ServerState)
+	FGokartState ServerState;
 
-	void UpdateLocationFromVelocity(float DeltaTime);
+	FVector Velocity;
 
-	void ApplyRotation(float DeltaTime);
+	UFUNCTION()
+	void OnRep_ServerState();
 
-	FVector GetAirResistance();
-	FVector GetRollingResistance();
-
+	UPROPERTY(Replicated)
+	float Throttle;
+	UPROPERTY(Replicated)
+	float SteeringThrow;
 };
