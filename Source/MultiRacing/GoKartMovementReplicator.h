@@ -4,17 +4,32 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "GoKartMovementReplication.generated.h"
+#include "GoKartMovementComponent.h"
+#include "GoKartMovementReplicator.generated.h"
 
+USTRUCT()
+struct FGoKartState
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY()
+	FTransform Transform;
+
+	UPROPERTY()
+	FVector Velocity;
+
+	UPROPERTY()
+	FGoKartMove LastMove;
+};
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class MULTIRACING_API UGoKartMovementReplication : public UActorComponent
+class MULTIRACING_API UGoKartMovementReplicator : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UGoKartMovementReplication();
+	UGoKartMovementReplicator();
 
 protected:
 	// Called when the game starts
@@ -26,6 +41,8 @@ public:
 
 private:
 	void ClearAcknowledgeMoves(FGoKartMove LastMove);
+
+	void UpdateServerState(const FGoKartMove& Move);
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SendMove(FGoKartMove Move);
@@ -39,4 +56,6 @@ private:
 
 	TArray<FGoKartMove> UnacknowledgedMoves;
 		
+	UPROPERTY()
+	UGoKartMovementComponent* MovementComponent;
 };

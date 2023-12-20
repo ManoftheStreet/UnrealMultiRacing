@@ -5,23 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "GoKartMovementComponent.h"
-#include "GoKartMovementReplication.h"
+#include "GoKartMovementReplicator.h"
 #include "GoKart.generated.h"
-
-USTRUCT()
-struct FGoKartState
-{
-	GENERATED_USTRUCT_BODY()
-
-	UPROPERTY()
-	FTransform Transform;
-
-	UPROPERTY()
-	FVector Velocity;
-
-	UPROPERTY()
-	FGoKartMove LastMove;
-};
 
 UCLASS()
 class MULTIRACING_API AGoKart : public APawn
@@ -51,5 +36,5 @@ private:
 	UGoKartMovementComponent* MovementComponent;
 
 	UPROPERTY(EditAnywhere)
-	UGoKartMovementReplication* MovementReplicator;
+	UGoKartMovementReplicator* MovementReplicator;
 };
